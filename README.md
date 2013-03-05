@@ -1,4 +1,4 @@
 kreport-editor
 ==============
 
-A javascript editor for pdf report generation
+The project is not yet on GitHub. Coming soon!
