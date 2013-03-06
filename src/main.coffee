@@ -28,7 +28,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   # This class is observable through save action.
   @observable 'save'
 
-  # And we set document parameters by default
+  # And we set default value into fields
   margin_top: '1cm'
   margin_bottom: '1cm'
   margin_left: '1cm'
@@ -47,7 +47,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   px2cm = (px) ->
     (parseFloat(px) / 28.346456692913385826771653543305).round(0.01) + 'cm'
 
-  # Format is a compound object
+  # Format attribute replace width & height with current format.
   @attr 'format',
     get: -> return @_format
     set: (value) ->
