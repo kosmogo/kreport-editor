@@ -55,7 +55,7 @@ gen_index = ->
     config.lib_dir + "/" + x[x.lastIndexOf('/')+1..-1].split('?')[0]
   scripts.push "#{config.output_dir}/#{config.project.name}-#{config.project.version}.js"
   scripts = scripts.map((x)->"""<script src="#{x}" type="text/javascript"></script>""").join("\n")
-  css = """<link href="#{config.css_dir}/#{config.project.name}-#{config.project.version}.css" type="text/css" rel="stylesheet">"""
+  css = """<link href="#{config.output_dir}/#{config.project.name}-#{config.project.version}.css" type="text/css" rel="stylesheet">"""
 
   if !path.existsSync("./index.html")
     fs.writeFileSync("./index.html",

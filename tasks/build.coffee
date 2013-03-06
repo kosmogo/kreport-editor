@@ -8,8 +8,7 @@ path = require 'path'
 config = global.config
 
 task 'build', 'Build js files from your coffees.', ->
-  files = []
-  recursive = (dir) ->
+  recursive = (dir, regexp) ->
     items = fs.readdirSync(dir)
     for it in items
       file = [dir, it].join("/")
@@ -17,15 +16,29 @@ task 'build', 'Build js files from your coffees.', ->
         info = fs.statSync file
 
         if info.isDirectory()
-          recursive(file)
-        else if /\.coffee$/.test file
+          recursive(file, regexp)
+        else if regexp.test file
           files.push file
 
-  recursive(config.source_dir)
+  files = []
+  recursive(config.source_dir, /\.coffee$/)
 
-  exec "coffee -j bin/#{config.project.name}-#{config.project.version}.js -c #{files.join(" ")}", (err, sout, serr)->
+  exec "coffee -j #{config.output_dir}/#{config.project.name}-#{config.project.version}.js -c #{files.join(" ")}", (err, sout, serr)->
     exerr.apply @, arguments
-    logger.success "Build successful `bin/#{config.project.name}-#{config.project.version}.js`" if not err? and serr is ''
+    logger.success "Build successful `#{config.output_dir}/#{config.project.name}-#{config.project.version}.js`" if not err? and serr is ''
+
+  files = []
+  recursive(config.css_dir, /\.scss$/)
+
+  #content = ""
+  #for file in files
+  #  content += fs.writeFileSync file
+  #console.log content
+
+  #sass.render
+  #exec "source #{config.sass_fix} && sass #{files} > #{config.output_dir}/#{config.project.name}-#{config.project.version}.css", (err, sout, serr) ->
+  #  exerr.apply @, arguments
+  #  logger.success "Build successful `#{config.output_dir}/#{config.project.name}-#{config.project.version}.css`" if not err? and serr is ''
 
 task 'sbuild', 'Build for IDE plugged in. Disable coloration on logger.', ->
   logger.colored_log = false

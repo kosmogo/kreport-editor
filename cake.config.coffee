@@ -11,6 +11,8 @@ exports.config =
   spec_dir:   'spec'
   css_dir:  'css'
   tasks_dir: 'tasks'
+  sass_fix: '~/.rvm/gems/ruby-1.9.3-p362'
   librairies: [
     'http://code.jquery.com/jquery-1.9.1.min.js'
+    'http://methvin.com/splitter/splitter.js'
   ]

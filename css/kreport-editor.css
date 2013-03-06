@@ -1,0 +1,111 @@
+/* Main reporting style */
+#kreport-content {
+  height: 100%;
+}
+
+#kreport-toolbox {
+  float: right;
+  width: 300px;
+  height: 100%;
+  background-color: red;
+}
+
+.kreport-navbar {
+  margin-bottom: 0px;
+}
+
+#kreport-canvas {
+  overflow: auto;
+  height: 100%;
+  background-color: #EEE;
+}
+
+#kreport-page {
+  margin: 1em auto;
+  width: 21cm;
+  height: 29.7cm;
+  background-color: #FCFCFC;
+  border: solid 1px #BBB;
+  box-shadow: 0px 0px 5px #CCC, 2px 2px 4px #999;
+}
+
+#kreport-page-content {
+  margin: 1cm;
+  width: 19cm;
+  height: 27.7cm;
+  border: dashed 1px #CCC;
+}
+
+#kreport-properties-panel {
+  height: 200px;
+  width: 300px;
+}
+
+.property-panel {
+  overflow-y: auto;
+  width: 100%;
+}
+
+.property-panel table {
+  width: 100%;
+}
+
+.property-panel form {
+  width: 100%;
+}
+
+/* property grid style */
+.property-panel tr {
+  /*border-bottom: dotted 1px #AAA;*/
+}
+
+.property-panel th {
+  text-align: left;
+  border-right: solid 1px #AAA;
+  border-bottom: dashed 1px #AAA;
+  padding: 0;
+}
+
+.property-panel tr:nth-child(odd)>th {
+  background-color: #E0E0E0;
+}
+
+.property-panel tr:nth-child(even)>th {
+  background-color: #E8E8E8;
+}
+
+
+.property-panel tr:last-child>th {
+  border-bottom: none
+}
+
+.property-panel td {
+  background-color: #FFF;
+  padding: 0;
+}
+
+.property-panel .prop-label {
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  margin: 0;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  font-size: x-small;
+  display: block;
+}
+
+.property-panel .prop-input {
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-radius: 0px !important;
+}
+
+/* FIX A BUG IN BOOTSTRAP? */
+.controls input[type=text] {
+  height: 30px;
+}
