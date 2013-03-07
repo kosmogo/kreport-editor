@@ -9,6 +9,11 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
 
   @KNOWN_FORMATS = ['A3', 'A4', 'A5', 'A6']
 
+  #Recreate `KNOWN FORMATS` via `FORMATS` field.
+  @UPDATE_KNOWN_FORMATS = ->
+    @KNOWN_FORMATS = []
+    @KNOWN_FORMATS.push k for k,v in @FORMATS
+
   # Menu hierarchy
   @MENUS:
     Report:
@@ -206,6 +211,8 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     @dialog = $(document.createElement('div')).attr(class: 'modal fade').css(display: 'none')
     @dialog.append [@dialog_header, @dialog_content, @dialog_footer]
     return @dialog
+
+  #Dialog rendering
   show_dialog: (title, opts={}) ->
     @dialog_title.text(title)
     @dialog.css(display: 'block').modal()
