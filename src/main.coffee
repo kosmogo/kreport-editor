@@ -49,11 +49,13 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   # Some helper functions
   # we set a local scope var
   # for fast use them.
+
+  # Here we convert cm to px with resolution of 96 dpi (1 in = 2.54 cm)
+  # For 1/72: 28.346456692913385826771653543305
   cm2px = @cm2px = (cm) ->
-    parseFloat(cm) * 37.795275590551181102362204724409 #28.346456692913385826771653543305
+    parseFloat(cm) * 37.795275590551181102362204724409
 
   px2cm = @px2cm = (px) ->
-    #(parseFloat(px) / 28.346456692913385826771653543305).round(0.01) + 'cm'
     (parseFloat(px) / 37.795275590551181102362204724409).round(0.01) + 'cm'
 
   # Format attribute replace width & height with current format.
@@ -232,9 +234,10 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     @dialog.modal('hide')
 
   add_component: (clazz) ->
-    element = $(document.createElement('div')).attr(class: 'kreport-component')
-    component = Cafeine.invoke(clazz, [element, this])
-    @page_content.append element
+    component = Cafeine.invoke(clazz, [$(document.createElement('div')), this])
+    @page_content.append component.element
+    # Triggering click to simulate the selection of the new component.
+    component.element.trigger('click')
 
   # Refresh the size parameters of the page.
   refresh_page: ->
@@ -362,6 +365,11 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
 
     #  ... And call it every time when window resize.
     $(window).resize => @resize
+
+    #Helper to keep tracking of mouseposition into the soft
+    $('body').on 'mousemove', (evt) =>
+      @mouseX = evt.pageX
+      @mouseY = evt.pageY
 
     # We refresh also the page properties size every time we update the editables fields.
     @when_edition_done @refresh_page

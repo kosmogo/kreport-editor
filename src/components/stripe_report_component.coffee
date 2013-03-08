@@ -3,14 +3,47 @@
 class @KReport.StripeReportItem extends Cafeine.ActiveObject
   @include Cafeine.Editable
 
-  @editable
-    content: 'string'
-    height: 'number'
-    width: 'number'
-    style: ->
-      @editor
+  content: ''
+  height: '1cm'
+  width: '2cm'
 
-  constructor: (@report, @band)->
+  @editable
+    content:
+      type: 'text'
+      label: 'Content'
+    height:
+      type: 'number'
+      label: 'Height'
+    width:
+      type: 'number'
+      label: 'Width'
+    x:
+      type: 'number'
+      label: 'Left Offset'
+    y:
+      type: 'number'
+      label: 'Top Offset'
+    style:
+      type: -> ['1', '2', '3']
+      label: 'Font style'
+
+  remove: -> alert('todo: remove')
+
+  refresh_element: ->
+    @element.css
+      width: @width
+      height: @height
+
+  contextmenu: ->
+    'Remove item': => @remove()
+
+  constructor: (@element, @band)->
+    @report = band.report
+    @element.attr(class: 'stripereport-item')
+    @element.data('contextmenu', @contextmenu())
+    @band.element.append @element
+
+    @refresh_element()
 
 
 #This is a band
@@ -38,11 +71,24 @@ class @KReport.StripeReportStripe extends Cafeine.ActiveObject
     "Add field": => @add_field()
     #Strip every time a key return "undefined"
     "*": undefined
-    "Add stripe above": => @add_stripe(false)
-    "Add stripe below": => @add_stripe(true)
+    "Add stripe above": => @add_stripe('before')
+    "Add stripe below": => @add_stripe('after')
     "**": undefined
     "Remove stripe": => @remove()
     "Edit stripe...": => @edit()
+
+  #This will create a stripe before or after current stripe
+  add_stripe: (position) ->
+    stripe_element = $(document.createElement('div'))
+    stripe = new KReport.StripeReportStripe(stripe_element, @parent)
+    @parent.add_stripe stripe
+    #call function before/after of jquery selector.
+    @element[position] stripe_element
+
+  #Add textual field to this band.
+  add_field: ->
+    field = new KReport.StripeReportItem($(document.createElement('div')), this)
+    @content.append field.element
 
   edit: ->
     self = this
@@ -68,19 +114,18 @@ class @KReport.StripeReportStripe extends Cafeine.ActiveObject
     self = this
 
     @resize_bottom.on 'mousedown', (evt) ->
-      resize_offset = evt.screenY
+      resize_offset = evt.pageY
       resize_started = true
       start_size = KReportEditor.cm2px(self.height)
-      console.log "start size = #{start_size} offset = #{evt.screenY}"
 
     $('html')
     .on 'mouseup', (evt) ->
       if resize_started
         resize_started = false
-        resize_diff =  evt.screenY - resize_offset
+        resize_diff =  evt.pageY - resize_offset
     .on 'mousemove', (evt) ->
       if resize_started
-        resize_diff =  evt.screenY - resize_offset
+        resize_diff =  evt.pageY - resize_offset
         self.height = KReportEditor.px2cm( start_size + resize_diff)
         self.refresh_element()
 
@@ -127,6 +172,7 @@ class @KReport.StripeReportComponent extends KReport.Component
   # Meta informations about this component (for save)
   @INFO:
     id: 'stripreport'
+    name: 'Strip Report'
     version: '1.0'
 
   @include Cafeine.Container, Cafeine.Editable
@@ -143,7 +189,10 @@ class @KReport.StripeReportComponent extends KReport.Component
     stripe_element = $(document.createElement('div'))
     stripe = new KReport.StripeReportStripe(stripe_element, this)
     @add_stripe stripe
-    @element.append stripe_element
+    @content.append stripe_element
+    # Triggering click to simulate the selection of the new stripe.
+    stripe_element.trigger('click')
+
 
   sub_menu: ->
     "New...":

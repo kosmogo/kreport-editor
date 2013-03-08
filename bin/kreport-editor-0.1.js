@@ -314,12 +314,10 @@
     };
 
     KReportEditor.prototype.add_component = function(clazz) {
-      var component, element;
-      element = $(document.createElement('div')).attr({
-        "class": 'kreport-component'
-      });
-      component = Cafeine.invoke(clazz, [element, this]);
-      return this.page_content.append(element);
+      var component;
+      component = Cafeine.invoke(clazz, [$(document.createElement('div')), this]);
+      this.page_content.append(component.element);
+      return component.element.trigger('click');
     };
 
     KReportEditor.prototype.refresh_page = function() {
@@ -472,6 +470,10 @@
       $(window).resize(function() {
         return _this.resize;
       });
+      $('body').on('mousemove', function(evt) {
+        _this.mouseX = evt.pageX;
+        return _this.mouseY = evt.pageY;
+      });
       this.when_edition_done(this.refresh_page);
     }
 
@@ -496,6 +498,10 @@
 
     Component.prototype.height = 0;
 
+    Component.prototype.remove = function() {
+      return this.element.remove();
+    };
+
     function Component(element, report) {
       var self,
         _this = this;
@@ -503,7 +509,8 @@
       this.report = report;
       this._oid = OID();
       this.element.attr({
-        id: "kreport-" + this.constructor.INFO.id + "-" + this._oid
+        id: "kreport-" + this.constructor.INFO.id + "-" + this._oid,
+        "class": 'kreport-component'
       });
       this.element.data('contextmenu', function(evt) {
         return typeof _this.sub_menu === "function" ? _this.sub_menu(evt) : void 0;
@@ -515,6 +522,18 @@
           return this.set(self);
         });
         return evt.stopPropagation();
+      });
+      this.title = $(document.createElement('div')).attr({
+        "class": 'kreport-component-title label label-info'
+      }).html(this.constructor.INFO.name + ' <a href="#" class="remove"><i class="icon-remove icon-white"></i></a>');
+      this.content = $(document.createElement('div')).attr({
+        "class": 'kreport-component-content'
+      });
+      this.element.append([this.title, this.content]);
+      this.title.find('a.remove').on('click', function() {
+        if (confirm('Are you sure?')) {
+          return _this.remove();
+        }
       });
     }
 
@@ -536,18 +555,71 @@
 
     StripeReportItem.include(Cafeine.Editable);
 
+    StripeReportItem.prototype.content = '';
+
+    StripeReportItem.prototype.height = '1cm';
+
+    StripeReportItem.prototype.width = '2cm';
+
     StripeReportItem.editable({
-      content: 'string',
-      height: 'number',
-      width: 'number',
-      style: function() {
-        return this.editor;
+      content: {
+        type: 'text',
+        label: 'Content'
+      },
+      height: {
+        type: 'number',
+        label: 'Height'
+      },
+      width: {
+        type: 'number',
+        label: 'Width'
+      },
+      x: {
+        type: 'number',
+        label: 'Left Offset'
+      },
+      y: {
+        type: 'number',
+        label: 'Top Offset'
+      },
+      style: {
+        type: function() {
+          return ['1', '2', '3'];
+        },
+        label: 'Font style'
       }
     });
 
-    function StripeReportItem(report, band) {
-      this.report = report;
+    StripeReportItem.prototype.remove = function() {
+      return alert('todo: remove');
+    };
+
+    StripeReportItem.prototype.refresh_element = function() {
+      return this.element.css({
+        width: this.width,
+        height: this.height
+      });
+    };
+
+    StripeReportItem.prototype.contextmenu = function() {
+      var _this = this;
+      return {
+        'Remove item': function() {
+          return _this.remove();
+        }
+      };
+    };
+
+    function StripeReportItem(element, band) {
+      this.element = element;
       this.band = band;
+      this.report = band.report;
+      this.element.attr({
+        "class": 'stripereport-item'
+      });
+      this.element.data('contextmenu', this.contextmenu());
+      this.band.element.append(this.element);
+      this.refresh_element();
     }
 
     return StripeReportItem;
@@ -592,10 +664,10 @@
         },
         "*": void 0,
         "Add stripe above": function() {
-          return _this.add_stripe(false);
+          return _this.add_stripe('before');
         },
         "Add stripe below": function() {
-          return _this.add_stripe(true);
+          return _this.add_stripe('after');
         },
         "**": void 0,
         "Remove stripe": function() {
@@ -605,6 +677,20 @@
           return _this.edit();
         }
       };
+    };
+
+    StripeReportStripe.prototype.add_stripe = function(position) {
+      var stripe, stripe_element;
+      stripe_element = $(document.createElement('div'));
+      stripe = new KReport.StripeReportStripe(stripe_element, this.parent);
+      this.parent.add_stripe(stripe);
+      return this.element[position](stripe_element);
+    };
+
+    StripeReportStripe.prototype.add_field = function() {
+      var field;
+      field = new KReport.StripeReportItem($(document.createElement('div')), this);
+      return this.content.append(field.element);
     };
 
     StripeReportStripe.prototype.edit = function() {
@@ -641,21 +727,20 @@
       start_size = 0;
       self = this;
       this.resize_bottom.on('mousedown', function(evt) {
-        resize_offset = evt.screenY;
+        resize_offset = evt.pageY;
         resize_started = true;
-        start_size = KReportEditor.cm2px(self.height);
-        return console.log("start size = " + start_size + " offset = " + evt.screenY);
+        return start_size = KReportEditor.cm2px(self.height);
       });
       return $('html').on('mouseup', function(evt) {
         var resize_diff;
         if (resize_started) {
           resize_started = false;
-          return resize_diff = evt.screenY - resize_offset;
+          return resize_diff = evt.pageY - resize_offset;
         }
       }).on('mousemove', function(evt) {
         var resize_diff;
         if (resize_started) {
-          resize_diff = evt.screenY - resize_offset;
+          resize_diff = evt.pageY - resize_offset;
           self.height = KReportEditor.px2cm(start_size + resize_diff);
           return self.refresh_element();
         }
@@ -712,6 +797,7 @@
 
     StripeReportComponent.INFO = {
       id: 'stripreport',
+      name: 'Strip Report',
       version: '1.0'
     };
 
@@ -733,7 +819,8 @@
       stripe_element = $(document.createElement('div'));
       stripe = new KReport.StripeReportStripe(stripe_element, this);
       this.add_stripe(stripe);
-      return this.element.append(stripe_element);
+      this.content.append(stripe_element);
+      return stripe_element.trigger('click');
     };
 
     StripeReportComponent.prototype.sub_menu = function() {
