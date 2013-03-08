@@ -22,7 +22,7 @@ task 'build', 'Build js files from your coffees.', ->
 
   files = []
   recursive(config.source_dir, /\.coffee$/)
-
+  files = files.sort (a,b) -> a.split('/').length - b.split('/').length
   exec "coffee -j #{config.output_dir}/#{config.project.name}-#{config.project.version}.js -c #{files.join(" ")}", (err, sout, serr)->
     exerr.apply @, arguments
     logger.success "Build successful `#{config.output_dir}/#{config.project.name}-#{config.project.version}.js`" if not err? and serr is ''

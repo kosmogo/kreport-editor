@@ -7,7 +7,6 @@
   float: right;
   width: 300px;
   height: 100%;
-  background-color: red;
 }
 
 .kreport-navbar {
@@ -34,6 +33,32 @@
   width: 19cm;
   height: 27.7cm;
   border: dashed 1px #CCC;
+}
+
+/* */
+.kreport-component {
+  min-height: 1cm;
+  border-top: dotted 1px #DDD;
+  margin-top: -1px;
+  position: relative;
+
+  transition: all ease-in-out 0.5s;
+  -moz-transition: all ease-in-out 0.5s;
+  -webkit-transition: all ease-in-out 0.5s;
+}
+
+.kreport-component:first-child {
+  margin-top: 0px;
+  border: none;
+}
+
+.kreport-component:last-child {
+  border-bottom: dotted 1px #DDD;
+}
+
+.kreport-component:hover, .kreport-component.selected {
+  z-index: 1000;
+  box-shadow: 0px 0px 15px 1px #999;
 }
 
 #kreport-properties-panel {
@@ -64,6 +89,7 @@
   border-right: solid 1px #AAA;
   border-bottom: dashed 1px #AAA;
   padding: 0;
+  width: 100px;
 }
 
 .property-panel tr:nth-child(odd)>th {
@@ -82,6 +108,7 @@
 .property-panel td {
   background-color: #FFF;
   padding: 0;
+  width: 200px;
 }
 
 .property-panel .prop-label {
@@ -108,4 +135,36 @@
 /* FIX A BUG IN BOOTSTRAP? */
 .controls input[type=text] {
   height: 30px;
+}
+
+.stripereport-stripe {
+  height: 0.5cm;
+  position: relative;
+  box-shadow: inset 0px 0px 0px 1px #EEE;
+}
+
+.stripereport-stripe:hover, .stripereport-stripe.selected {
+  box-shadow: inset 0px 0px 1px 4px #FDD017;
+}
+
+.stripereport-stripe-header {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  opacity: 0;
+
+  transition: opacity ease-in-out 0.3s;
+}
+
+.stripereport-stripe:hover .stripereport-stripe-header,
+.stripereport-stripe.selected .stripereport-stripe-header {
+  opacity: 1;
+}
+
+.stripereport-stripe-resize {
+  cursor: s-resize;
+  position: absolute;
+  bottom: 0px;
+  height: 10px;
+  width: 100%;
 }

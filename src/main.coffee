@@ -24,6 +24,8 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
       Undo: 'undo'
       Redo: 'redo'
 
+  @CONTEXTUAL_MENU: {}
+
   # Using of useful [cafeine](http://github.com/anykeyh/cafeine) class macros
   @include Cafeine.Plugin, Cafeine.Editable, Cafeine.Observable
 
@@ -44,13 +46,15 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   height: KReportEditor.FORMATS['A4'][1]
   landscape: no
 
-  #some private helper functions
-  #
-  cm2px = (cm) ->
-    parseFloat(cm) * 28.346456692913385826771653543305
+  # Some helper functions
+  # we set a local scope var
+  # for fast use them.
+  cm2px = @cm2px = (cm) ->
+    parseFloat(cm) * 37.795275590551181102362204724409 #28.346456692913385826771653543305
 
-  px2cm = (px) ->
-    (parseFloat(px) / 28.346456692913385826771653543305).round(0.01) + 'cm'
+  px2cm = @px2cm = (px) ->
+    #(parseFloat(px) / 28.346456692913385826771653543305).round(0.01) + 'cm'
+    (parseFloat(px) / 37.795275590551181102362204724409).round(0.01) + 'cm'
 
   # Format attribute replace width & height with current format.
   @attr 'format',
@@ -104,8 +108,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   # Here we implement actions methods.
   _when_action_save: ->
     self = this
-    @properties.propertiesPanel ->
-      @set self
+    @properties.propertiesPanel -> @set self
     return true
 
   _when_action_properties:  ->
@@ -194,11 +197,6 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
 
   #  Dialog handling.
   init_dialog: ->
-    #<div class="modal-header">
-    #  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    #  <h3>Modal header</h3>
-    #</div>
-
     @dialog_title = $(document.createElement('h3'))
     @dialog_header = $(document.createElement('div')).attr(class: 'modal-header').append([
       $(document.createElement('button')).attr(type: 'button', class: 'close', 'data-dismiss':'modal', 'aria-hidden':'true').html("&times;")
@@ -233,6 +231,11 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   hide_dialog: ->
     @dialog.modal('hide')
 
+  add_component: (clazz) ->
+    element = $(document.createElement('div')).attr(class: 'kreport-component')
+    component = Cafeine.invoke(clazz, [element, this])
+    @page_content.append element
+
   # Refresh the size parameters of the page.
   refresh_page: ->
     inner_width = px2cm(cm2px(@width) - (cm2px(@margin_left)+cm2px(@margin_right)))
@@ -257,6 +260,46 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
       width: inner_width,
       height: inner_height
 
+
+  #This generate a bootstrap compliant dropdown menu, with items writtend into a javascript object.
+  generate_sub_menu: (obj) ->
+    ul = $(document.createElement("ul")).attr(class: "dropdown-menu", role:"menu", "aria-labelledby": "dLabel")
+
+    for k,v of obj
+      li = $(document.createElement("li"))
+      if typeof v is 'undefined'
+        li.addClass('divider')
+      else if typeof v in ['function', 'string']
+        in_link = $(document.createElement("a")).attr(tabindex:'-1', href:'#').text(k)
+        do(k=k, v=v, in_link=in_link, self=this) ->
+          in_link.on 'click', ->
+            if typeof v is 'function'
+              v.call(self)
+            else
+              self.when_action(v)
+        li.append in_link
+      else
+        li.addClass('dropdown-submenu')
+        li.append $(document.createElement("a")).attr(tabindex:'-1', href:'#').text(k)
+        li.append @generate_sub_menu(v)
+
+      ul.append li
+
+    return ul
+
+  generate_contextual_menu: (target=KReportEditor.CONTEXTUAL_MENU) ->
+    @contextual_menu ?= $(document.createElement('div')).attr id: "kreport-document-context-menu"
+    @contextual_menu.empty()
+
+    ul = @generate_sub_menu(target)
+
+    @contextual_menu.append ul
+
+  #Select an HTML element.
+  select: (selectable) ->
+    $(".selected", @element).removeClass("selected")
+    $(selectable).addClass("selected")
+
   constructor: (element) ->
     # We build the main element structure
     @element = $ element
@@ -279,23 +322,47 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     @content.append [@toolbox, @canvas]
     @element.append @content
 
-    @page = $(document.createElement('div')).attr(id: 'kreport-page')
+    @page = $(document.createElement('div')).attr(id: 'kreport-page', 'data-target':"#kreport-document-context-menu" )
     @page_content =  $(document.createElement('div')).attr(id: 'kreport-page-content')
-
     @element.append @init_dialog()
 
     @page.append @page_content
     @canvas.append @page
 
-    #  Here we prepare the jquery plugins
+    @element.append @generate_contextual_menu()
+
+    #contextual menu preparation
+    self = this
+    @page.contextmenu()
+    @page.data('contextmenu', KReportEditor.CONTEXTUAL_MENU)
+    # We check for subcontextual menu
+    @page
+    .on 'context', (evt) ->
+      item_path = [evt.mouseTarget]
+      #We select the best context menu for this target.
+      $(evt.mouseTarget).parents().each -> item_path.push this
+      for x in item_path
+        menu = $(x).data('contextmenu')
+        if typeof menu is 'object'
+          self.generate_contextual_menu(menu)
+          break
+        else if typeof menu is 'function'
+          self.generate_contextual_menu(menu())
+          break
+    # When we click on page, we select the page properties
+    .on 'click', (evt) ->
+      self.select self.page
+      self.properties.propertiesPanel('set', self)
+
+    #  We prepare the bootstrap dropdown plugins
     $('.dropdown-toggle').dropdown()
 
     #  Call resize once to keep each elements up...
     @resize()
 
-    #  And call it every time when window resize.
+    #  ... And call it every time when window resize.
     $(window).resize => @resize
 
-    # We refresh the page size every time we update the editables fields.
+    # We refresh also the page properties size every time we update the editables fields.
     @when_edition_done @refresh_page
 

@@ -237,11 +237,17 @@ Take a look at our basic `Component` class, extend it, tweak and plug it!
 ### Add new menu item into editor
 
     KReportEditor.MENUS //Menu hierarchy of the soft.
+
     //To add action (ex: Tools/doSomeCoolThing ):
-    KReportEditor.MENUS.Tools = KReportEditor.MENUS.Tools || {}
-    KReportEditor.MENUS.Tools.doSomeCoolThing = 'do_something_cool'
+    Cafeine.merge(KReportEditor.MENUS, {
+      Tools: {
+        doSomeCoolThing: 'do_something_cool'
+      }
+    });
+
     KReportEditor.prototype._when_action_do_something_cool = function() {
       //Here your action.
+      alert('this is a cool thing!');
     }
 
 ### Other customisations
