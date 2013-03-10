@@ -1,0 +1,38 @@
+<!DOCTYPE html>  <html> <head>   <title>properties_panel.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               properties_panel.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p><code>PropertiesPanel</code> is a component
+which used for editing fields of an editable object.
+You can use it as standalone, with jquery extension <code>propertiesPanel</code></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">PropertiesPanel</span> <span class="k">extends</span> <span class="nx">Cafeine</span><span class="p">.</span><span class="nx">ActiveObject</span>
+  <span class="nx">@include</span> <span class="nx">Cafeine</span><span class="p">.</span><span class="nx">Plugin</span>
+
+  <span class="nx">@jquery_plugin</span> <span class="s">&#39;propertiesPanel&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>As all dom component,
+constructor empty the target element
+and fill with own elements.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="nf">(element) -&gt;</span>
+    <span class="vi">@element = </span><span class="nx">$</span> <span class="nx">element</span>
+
+    <span class="vi">@table = </span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s">&#39;table&#39;</span><span class="p">))</span>
+    <span class="vi">@tbody = </span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s">&#39;tbody&#39;</span><span class="p">))</span>
+
+    <span class="nx">@table</span><span class="p">.</span><span class="nx">append</span> <span class="nx">@tbody</span>
+
+    <span class="nx">@element</span><span class="p">.</span><span class="nx">empty</span><span class="p">().</span><span class="nx">append</span><span class="p">(</span><span class="nx">@table</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&#39;property-panel&#39;</span><span class="p">)</span>
+
+  <span class="nv">set: </span><span class="nf">(target) -&gt;</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s">&quot;target must be include ActiveObject.Editable&quot;</span><span class="p">)</span> <span class="nx">unless</span> <span class="nx">target</span><span class="p">.</span><span class="nx">create_edit_form</span><span class="o">?</span>
+
+    <span class="nv">form = </span><span class="nx">target</span><span class="p">.</span><span class="nx">create_edit_form</span>
+      <span class="nv">per_field_update: </span><span class="kc">yes</span>
+      <span class="k">class</span><span class="o">:</span> <span class="s">&#39;&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Making of the table of properties</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nv">decoration: </span><span class="nf">(label, control) -&gt;</span>
+        <span class="nv">tr = </span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s">&#39;tr&#39;</span><span class="p">))</span><span class="c1">#.attr( class: &#39;prop-field&#39; )</span>
+        <span class="nv">td_label = </span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s">&#39;th&#39;</span><span class="p">))</span><span class="c1">#.attr( class: &#39;prop-label&#39;)</span>
+        <span class="nv">td_data = </span><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s">&#39;td&#39;</span><span class="p">))</span><span class="c1">#.attr( class: &#39;prop-input&#39;)</span>
+        <span class="nx">$</span><span class="p">(</span><span class="nx">control</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="nv">width: </span><span class="s">&#39;100%&#39;</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&#39;prop-input&#39;</span><span class="p">)</span>
+        <span class="nx">$</span><span class="p">(</span><span class="nx">label</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&#39;prop-label&#39;</span><span class="p">)</span>
+
+        <span class="nx">td_label</span><span class="p">.</span><span class="nx">append</span> <span class="nx">label</span>
+        <span class="nx">td_data</span><span class="p">.</span><span class="nx">append</span> <span class="nx">control</span>
+        <span class="nx">tr</span><span class="p">.</span><span class="nx">append</span><span class="p">([</span><span class="nx">td_label</span><span class="p">,</span> <span class="nx">td_data</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="nx">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nx">@tbody</span><span class="p">.</span><span class="nx">empty</span><span class="p">().</span><span class="nx">append</span> <span class="nx">form</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

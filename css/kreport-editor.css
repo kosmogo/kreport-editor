@@ -200,4 +200,64 @@
   bottom: 0px;
   height: 10px;
   width: 100%;
+
+  background-color: gray;
 }
+
+.stripe-item.anchor {
+  width: 6px;
+  height: 6px;
+  border: solid 1px black;
+  position: absolute;
+}
+
+.stripe-item.anchor:hover {
+  background-color: #FDD017;
+}
+
+.stripe-item.anchor.anchor-n {
+  top: -3px;
+  left: 50%;
+  margin-left: -3px;
+}
+
+.stripe-item.anchor.anchor-ne {
+  right: -3px;
+  top: -3px;
+}
+
+.stripe-item.anchor.anchor-e {
+  right: -3px;
+  top: 50%;
+  margin-top: -3px;
+}
+
+.stripe-item.anchor.anchor-se {
+  right: -3px;
+  bottom: -3px;
+}
+
+.stripe-item.anchor.anchor-s {
+  left: 50%;
+  bottom: -3px;
+  margin-left: -3px;
+}
+
+.stripe-item.anchor.anchor-sw {
+  left: -3px;
+  bottom: -3px;
+}
+
+.stripe-item.anchor.anchor-w {
+  left: -3px;
+  top: 50%;
+  margin-top: -3px;
+}
+
+.stripe-item.anchor.anchor-nw {
+  left: -3px;
+  top: -3px;
+}
+
+
+
