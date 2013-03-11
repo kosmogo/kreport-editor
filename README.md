@@ -1,7 +1,7 @@
 KReport editor
 ==============
 
-<div style="color: #880000; font-weight:bold; font-size: big">
+<div style="color: #880000 !important; font-weight:bold !important; font-size: big !important">
   <p>The project is not yet finalized!
   <p>This document show only the futures specs of the projet.
 The project will tend to be used like that!
@@ -221,6 +221,9 @@ Contribution & upgrade
 ## Read source documentation
 
 The `/doc` library is a `docco` generated source.
+
+Explore the [documented sources here](http://htmlpreview.github.com/?https://github.com/kosmogo/kreport-editor/blob/master/doc/index.html)
+
 We tried to comment a lot the code, so enjoy!
 
 ## Create extension

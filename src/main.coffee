@@ -1,6 +1,54 @@
-# Core object of the KReportEditor.
+# # KReportEditor #
+#
+# Goals
+# -----
+#
+#   Provides a poweful report editor for cloud applications
+# fully written in coffeescript.
+#
+#   Testing [cafeine](http://github.com/anykeyh/cafeine) library in production
+#
+#   Have lot of fun during development!
+#
+# Summary
+# -------
+#
+# Go take a look at [https://www.github.com/kosmogo/kreport-editor]
+# for further informations
+#
+# Authors
+# -------
+#
+#   [Yacine Petitprez](mailto:yacine@kosmogo.com)
+#   [Paul Toth](mailto:xxx@yyy.com)
+#
 window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
+  # Using of useful [cafeine](http://github.com/anykeyh/cafeine) class macros
+  @include Cafeine.Plugin, Cafeine.Editable, Cafeine.Observable
+
+  # KReportEditor as jQuery plugin
+  # ------------------------------
+  #
+  # KReportEditor is deployed as jQuery plugin.
+  # To load the editor, **NOTHING IS MORE EASY**
+  #
+  #     $(document).append($('<div>').kreport())
+  #
+  # That's all. cool isn't?
+  @jquery_plugin "kreport"
+
+
+  # Tweakables constants
+  # --------------------
+  #
   # Paper format constants
+  # You can customize your formats easily.
+  # You must call `UPDATE_KNOWN_FORMATS` after each
+  # hash modification.
+  #
+  #     KReportEditor.FORMATS['mine'] = ['20cm', '15cm']
+  #     KReportEditor.UPDATE_KNOWN_FORMATS()
+  #
   @FORMATS =
     A6: ['10.5cm', '14.8cm']
     A5: ['14.8cm', '21cm']
@@ -9,12 +57,22 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
 
   @KNOWN_FORMATS = ['A3', 'A4', 'A5', 'A6']
 
-  #Recreate `KNOWN FORMATS` via `FORMATS` field.
   @UPDATE_KNOWN_FORMATS = ->
     @KNOWN_FORMATS = []
     @KNOWN_FORMATS.push k for k,v in @FORMATS
 
-  # Menu hierarchy
+  # Menu hiearchy:
+  # Here we have all actions rendered into bootstrap
+  # nav menu (on top of the application.)
+  # This part of code should be refactored,
+  # because currently the menus can be only one level
+  # of deep (no recursive code).
+  #
+  # NOTE: `***` means division bar.
+  #
+  # You can add a menu item like this:
+  #
+  #     Cafeine.merge( KReportEditor.MENUS, Group: { Item: -> alert('some action') } )
   @MENUS:
     Report:
       Save: "save"
@@ -26,16 +84,17 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
 
   @CONTEXTUAL_MENU: {}
 
-  # Using of useful [cafeine](http://github.com/anykeyh/cafeine) class macros
-  @include Cafeine.Plugin, Cafeine.Editable, Cafeine.Observable
 
-  #   Here to deploy this class as jquery report.
-  @jquery_plugin "kreport"
-
-  # This class is observable through save action.
+  # Set the events trigger by the editor
+  #
+  #   _save_: called when the save button is triggered.
   @observable 'save'
 
-  # And we set default value into fields
+  # Document properties
+  # --------------------
+  #
+  # Set the size of the document, margins,
+  # name and disposition (landscape/portrait)
   margin_top: '1cm'
   margin_bottom: '1cm'
   margin_left: '1cm'
@@ -46,33 +105,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   height: KReportEditor.FORMATS['A4'][1]
   landscape: no
 
-  # Some helper functions
-  # we set a local scope var
-  # for fast use them.
-
-  # Here we convert cm to px with resolution of 96 dpi (1 in = 2.54 cm)
-  # For 1/72: 28.346456692913385826771653543305
-  cm2px = @cm2px = (cm) ->
-    parseFloat(cm) * 37.795275590551181102362204724409
-
-  px2cm = @px2cm = (px) ->
-    (parseFloat(px) / 37.795275590551181102362204724409).round(0.01) + 'cm'
-
-  # Format attribute replace width & height with current format.
-  @attr 'format',
-    get: -> return @_format
-    set: (value) ->
-      vals = KReportEditor.FORMATS[value]
-      if vals?
-        @_format = value
-      else
-        @_format = 'A4'
-        vals = KReportEditor.FORMATS[@_format]
-
-      @width = vals[0]
-      @height = vals[1]
-
-  # Set the parameters as editables.
+  # Also, we prepare the editor.
   @editable
     'name':
       label: 'Name'
@@ -95,6 +128,40 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     'margin_right':
       label: 'Margin Right (cm)'
       type: 'string'
+
+
+  # Conversion functions
+  # ---------------------
+  #
+  # Just conversion between centimeters and pixels.
+  # KReportEditor is currently build to keep and works
+  # with centimeters. We are europeans, and we don't care
+  # about inches, sorry. Maybe one day...
+  #
+  # _Note_: resolution is 96 dpi (and one inch = 2.54 cm)
+  # Constants:
+  # px per cm (92dpi) = 37.795275590551181102362204724409
+  # <small>For your interest in 72 dpi : 28.346456692913385826771653543305</small>
+  cm2px = @cm2px = (cm) ->
+    parseFloat(cm) * 37.795275590551181102362204724409
+
+  px2cm = @px2cm = (px) ->
+    (parseFloat(px) / 37.795275590551181102362204724409).round(0.01) + 'cm'
+
+  # Format attribute replace width & height with current format.
+  @attr 'format',
+    get: -> return @_format
+    set: (value) ->
+      vals = KReportEditor.FORMATS[value]
+      if vals?
+        @_format = value
+      else
+        @_format = 'A4'
+        vals = KReportEditor.FORMATS[@_format]
+
+      @width = vals[0]
+      @height = vals[1]
+
 
   # Action callbacks.
   # We check if the action exists in the class.
