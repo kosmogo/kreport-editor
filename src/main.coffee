@@ -20,7 +20,7 @@
 # -------
 #
 #   [Yacine Petitprez](mailto:yacine@kosmogo.com)
-#   [Paul Toth](mailto:xxx@yyy.com)
+#   [Paul Toth](mailto:tothpaul@execute.re)
 #
 window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   # Using of useful [cafeine](http://github.com/anykeyh/cafeine) class macros
@@ -262,7 +262,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     return @navbar
 
   resize: ->
-    @content.css height: @content.height() -  @navbar.height()
+    @content.css height: @element.height() -  @navbar.height()
 
   #  Dialog handling.
   init_dialog: ->
@@ -431,7 +431,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     @resize()
 
     #  ... And call it every time when window resize.
-    $(window).resize => @resize
+    $(window).resize => @resize()
 
     #Helper to keep tracking of mouseposition into the soft
     $('body').on 'mousemove', (evt) =>
