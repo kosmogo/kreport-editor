@@ -10,6 +10,10 @@
 
     __extends(KReportEditor, _super);
 
+    KReportEditor.include(Cafeine.Plugin, Cafeine.Editable, Cafeine.Observable);
+
+    KReportEditor.jquery_plugin("kreport");
+
     KReportEditor.FORMATS = {
       A6: ['10.5cm', '14.8cm'],
       A5: ['14.8cm', '21cm'],
@@ -45,10 +49,6 @@
 
     KReportEditor.CONTEXTUAL_MENU = {};
 
-    KReportEditor.include(Cafeine.Plugin, Cafeine.Editable, Cafeine.Observable);
-
-    KReportEditor.jquery_plugin("kreport");
-
     KReportEditor.observable('save');
 
     KReportEditor.prototype.margin_top = '1cm';
@@ -68,32 +68,6 @@
     KReportEditor.prototype.height = KReportEditor.FORMATS['A4'][1];
 
     KReportEditor.prototype.landscape = false;
-
-    cm2px = KReportEditor.cm2px = function(cm) {
-      return parseFloat(cm) * 37.795275590551181102362204724409;
-    };
-
-    px2cm = KReportEditor.px2cm = function(px) {
-      return (parseFloat(px) / 37.795275590551181102362204724409).round(0.01) + 'cm';
-    };
-
-    KReportEditor.attr('format', {
-      get: function() {
-        return this._format;
-      },
-      set: function(value) {
-        var vals;
-        vals = KReportEditor.FORMATS[value];
-        if (vals != null) {
-          this._format = value;
-        } else {
-          this._format = 'A4';
-          vals = KReportEditor.FORMATS[this._format];
-        }
-        this.width = vals[0];
-        return this.height = vals[1];
-      }
-    });
 
     KReportEditor.editable({
       'name': {
@@ -126,8 +100,37 @@
       }
     });
 
+    cm2px = KReportEditor.cm2px = function(cm) {
+      return parseFloat(cm) * 37.795275590551181102362204724409;
+    };
+
+    px2cm = KReportEditor.px2cm = function(px) {
+      return (parseFloat(px) / 37.795275590551181102362204724409).round(0.01) + 'cm';
+    };
+
+    KReportEditor.attr('format', {
+      get: function() {
+        return this._format;
+      },
+      set: function(value) {
+        var vals;
+        vals = KReportEditor.FORMATS[value];
+        if (vals != null) {
+          this._format = value;
+        } else {
+          this._format = 'A4';
+          vals = KReportEditor.FORMATS[this._format];
+        }
+        this.width = vals[0];
+        return this.height = vals[1];
+      }
+    });
+
     KReportEditor.prototype.when_action = function(name) {
-      if (this["_when_action_" + name] != null) {
+      if (typeof name === 'function') {
+        name.call(this);
+        return true;
+      } else if (this["_when_action_" + name] != null) {
         this["_when_action_" + name]();
         return true;
       } else {
@@ -252,7 +255,7 @@
 
     KReportEditor.prototype.resize = function() {
       return this.content.css({
-        height: this.content.height() - this.navbar.height()
+        height: this.element.height() - this.navbar.height()
       });
     };
 
@@ -466,10 +469,11 @@
         self.select(self.page);
         return self.properties.propertiesPanel('set', self);
       });
+      this.page.click();
       $('.dropdown-toggle').dropdown();
       this.resize();
       $(window).resize(function() {
-        return _this.resize;
+        return _this.resize();
       });
       $('body').on('mousemove', function(evt) {
         _this.mouseX = evt.pageX;

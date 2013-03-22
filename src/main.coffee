@@ -20,7 +20,7 @@
 # -------
 #
 #   [Yacine Petitprez](mailto:yacine@kosmogo.com)
-#   [Paul Toth](mailto:xxx@yyy.com)
+#   [Paul Toth](mailto:tothpaul@execute.re)
 #
 window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   # Using of useful [cafeine](http://github.com/anykeyh/cafeine) class macros
@@ -167,7 +167,10 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
   # We check if the action exists in the class.
   # Else we put a warning.
   when_action: (name) ->
-    if @["_when_action_#{name}"]?
+    if typeof name is 'function'
+      name.call(this)
+      return true
+    else if @["_when_action_#{name}"]?
       @["_when_action_#{name}"]()
       return true
     else
@@ -262,7 +265,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     return @navbar
 
   resize: ->
-    @content.css height: @content.height() -  @navbar.height()
+    @content.css height: @element.height() -  @navbar.height()
 
   #  Dialog handling.
   init_dialog: ->
@@ -424,6 +427,9 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
       self.select self.page
       self.properties.propertiesPanel('set', self)
 
+    # Show the page properties
+    @page.click()
+
     #  We prepare the bootstrap dropdown plugins
     $('.dropdown-toggle').dropdown()
 
@@ -431,7 +437,7 @@ window.KReportEditor = class KReportEditor extends Cafeine.ActiveObject
     @resize()
 
     #  ... And call it every time when window resize.
-    $(window).resize => @resize
+    $(window).resize => @resize()
 
     #Helper to keep tracking of mouseposition into the soft
     $('body').on 'mousemove', (evt) =>

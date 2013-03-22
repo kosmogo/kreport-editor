@@ -71,6 +71,11 @@
   border-bottom: dotted 1px #DDD;
 }
 
+/* menu over components */
+.navbar .nav {
+  z-index: 1002;
+}
+
 .kreport-component:hover .kreport-component-title,
 .kreport-component.selected .kreport-component-title {
   z-index: 1001;
